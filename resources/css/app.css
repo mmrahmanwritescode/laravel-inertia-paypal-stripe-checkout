@@ -1,0 +1,16 @@
+@import 'bootstrap/dist/css/bootstrap.min.css';
+
+/* Custom styles */
+body {
+    background-color: #f8f9fa;
+}
+
+.cart-item-img {
+    width: 64px;
+    height: 64px;
+    object-fit: cover;
+}
+
+.btn-custom {
+    border-radius: 8px;
+}
