@@ -3,13 +3,13 @@
 A modern, full-featured food ordering system with dual payment gateway integration (PayPal & Stripe), built using Laravel 12, Inertia.js, Vue 3, and comprehensive webhook support.
 
 ## 🚀 Live Demo
-**Try it now:** [https://laravel-inertia-paypal.laravelcs.com/checkout](https://laravel-inertia-paypal.laravelcs.com/checkout)
+**Try it now:** [https://laravel-inertia-paypal-stripe.laravelcs.com/checkout](https://laravel-inertia-paypal-stripe.laravelcs.com/checkout)
 
 Experience the complete checkout flow with dual payment options - choose between PayPal and Stripe with real-time payment processing and webhook integration!
 
 ## Screenshots
 
-![Laravel inertia stripe checkout](https://laravelcs.com/images/github/laravel-ineria-paypal-checkout.png)
+![Laravel inertia stripe checkout](https://laravelcs.com/images/github/laravel-ineria-paypal-stripe-checkout.png)
 
 ## 🛠️ Technology Stack
 
