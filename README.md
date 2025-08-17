@@ -358,44 +358,6 @@ resources/js/
         └── Confirmed.vue              # Order confirmation
 ```
 
-## 🧪 Testing
-
-### Dual Payment Gateway Testing
-
-#### PayPal Testing (Sandbox Accounts)
-```bash
-# Use PayPal Developer Dashboard Sandbox accounts:
-# Personal Account: buyer@example.com / password
-# Business Account: merchant@example.com / password
-
-# Test different PayPal payment scenarios in sandbox mode
-```
-
-#### Stripe Testing (Test Cards)
-```bash
-# Use Stripe test card numbers:
-# Successful payment: 4242424242424242
-# Declined payment: 4000000000000002
-# 3D Secure required: 4000002500003155
-
-# Test different Stripe payment scenarios in test mode
-```
-
-### Webhook Testing
-```bash
-# Test webhooks locally using ngrok for both gateways
-
-# PayPal webhook testing:
-# - Complete a sandbox PayPal payment
-# - Cancel a PayPal payment mid-flow
-# - Check webhook event logs in Laravel log files
-
-# Stripe webhook testing:  
-# - Complete a test Stripe payment
-# - Use Stripe CLI for webhook testing: stripe listen --forward-to localhost:8000/stripe/webhook
-# - Check webhook event logs in Laravel log files
-```
-
 ## 🔍 Monitoring & Logging
 
 ### Webhook Events
