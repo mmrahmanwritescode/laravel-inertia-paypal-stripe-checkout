@@ -40,8 +40,6 @@ Experience the complete checkout flow with dual payment options - choose between
 
 ### 💳 Advanced Dual Payment Processing
 - **Payment Gateway Selection:**
-  - PayPal Smart Payment Buttons with multiple payment methods
-  - Stripe Elements with card payments and Payment Intents
   - User can choose payment method during checkout
 - **Multiple Order Types:**
   - Delivery (with shipping cost)
@@ -61,7 +59,7 @@ Experience the complete checkout flow with dual payment options - choose between
   - Dynamic order total calculation
   - Secure webhook processing for both gateways
 
-### � Order Management System
+### 📦 Order Management System
 - **Interactive Order Status Management:**
   - Cancel orders with reason tracking
   - Confirm orders for preparation

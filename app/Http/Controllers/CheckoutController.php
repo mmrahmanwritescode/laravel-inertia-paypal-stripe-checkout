@@ -124,41 +124,6 @@ class CheckoutController extends Controller
         }
     }
 
-    public function index(): Response
-    {
-        $cartItems = top_cart_query();
-        $cartSummary = cart_summary();
-
-        $stripePublishableKey = config('services.stripe.publishable_key');
-        if (empty($cartItems) || $cartSummary['count'] === 0) {
-            return Inertia::render('Checkout/Show', [
-                'cartData' => [
-                    'items' => [],
-                    'summary' => ['total' => 0, 'count' => 0]
-                ],
-                'paypal' => [
-                    'client_id' => config('services.paypal.client_id')
-                ],
-                'stripe' => [
-                    'publishable_key' => $stripePublishableKey
-                ]
-            ]);
-        }
-
-        return Inertia::render('Checkout/Show', [
-            'cartData' => [
-                'items' => $cartItems,
-                'summary' => $cartSummary
-            ],
-            'paypal' => [
-                'client_id' => config('services.paypal.client_id')
-            ],
-            'stripe' => [
-                'publishable_key' => $stripePublishableKey
-            ]
-        ]);
-    }
-
     public function createPayPalOrder(Request $request)
     {
         $request->validate([
@@ -231,6 +196,82 @@ class CheckoutController extends Controller
         }
     }
 
+    public function handlePayPalPaymentStatus(Request $request)
+    {
+        $request->validate([
+            'paypal_order_id' => 'required|string',
+            'order_id' => 'required|exists:orders,id'
+        ]);
+
+        try {
+            $order = Order::findOrFail($request->order_id);
+            
+            // Capture the PayPal payment
+            $response = $this->paypalService->captureOrder($request->paypal_order_id);
+
+            if ($response['paymentStatus']) {
+                $order->update([
+                    'transaction_id' => $response['transactionID'],
+                    'paypal_capture_id' => $response['captureID'] ?? null,
+                    'status' => 'order_placed'
+                ]);
+                clearCart();
+
+                return response()->json([
+                    'success' => true,
+                    'transactionID' => $response['transactionID'],
+                    'redirect_url' => route('orders.confirm', $order->purchase_order_id)
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'error' => $response['error'] ?: 'Payment capture failed'
+                ], 400);
+            }
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function index(): Response
+    {
+        $cartItems = top_cart_query();
+        $cartSummary = cart_summary();
+
+        $stripePublishableKey = config('services.stripe.publishable_key');
+        if (empty($cartItems) || $cartSummary['count'] === 0) {
+            return Inertia::render('Checkout/Show', [
+                'cartData' => [
+                    'items' => [],
+                    'summary' => ['total' => 0, 'count' => 0]
+                ],
+                'paypal' => [
+                    'client_id' => config('services.paypal.client_id')
+                ],
+                'stripe' => [
+                    'publishable_key' => $stripePublishableKey
+                ]
+            ]);
+        }
+
+        return Inertia::render('Checkout/Show', [
+            'cartData' => [
+                'items' => $cartItems,
+                'summary' => $cartSummary
+            ],
+            'paypal' => [
+                'client_id' => config('services.paypal.client_id')
+            ],
+            'stripe' => [
+                'publishable_key' => $stripePublishableKey
+            ]
+        ]);
+    }    
+
     public function store(Request $request)
     {
         $validationRules = [
@@ -274,48 +315,7 @@ class CheckoutController extends Controller
             return redirect()->back()
                 ->withErrors(['error' => 'Failed to place order: ' . $e->getMessage()]);
         }
-    }
-
-    public function handlePayPalPaymentStatus(Request $request)
-    {
-        $request->validate([
-            'paypal_order_id' => 'required|string',
-            'order_id' => 'required|exists:orders,id'
-        ]);
-
-        try {
-            $order = Order::findOrFail($request->order_id);
-            
-            // Capture the PayPal payment
-            $response = $this->paypalService->captureOrder($request->paypal_order_id);
-
-            if ($response['paymentStatus']) {
-                $order->update([
-                    'transaction_id' => $response['transactionID'],
-                    'paypal_capture_id' => $response['captureID'] ?? null,
-                    'status' => 'order_placed'
-                ]);
-                clearCart();
-
-                return response()->json([
-                    'success' => true,
-                    'transactionID' => $response['transactionID'],
-                    'redirect_url' => route('orders.confirm', $order->purchase_order_id)
-                ]);
-            } else {
-                return response()->json([
-                    'success' => false,
-                    'error' => $response['error'] ?: 'Payment capture failed'
-                ], 400);
-            }
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'error' => $e->getMessage()
-            ], 500);
-        }
-    }
+    }    
 
     protected function saveTempOrder(Request $request): Order
     {
