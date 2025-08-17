@@ -25,7 +25,10 @@ class StripeWebhookController extends Controller
 
         // Verify webhook signature
         if (!$this->stripeService->verifyWebhook($payload, $sigHeader)) {
-            Log::error('Stripe webhook signature verification failed');
+            Log::error('Stripe webhook signature verification failed', [
+                'signature_header' => $sigHeader,
+                'payload_preview' => substr($payload, 0, 100)
+            ]);
             return response()->json(['error' => 'Invalid signature'], 400);
         }
 
@@ -45,6 +48,10 @@ class StripeWebhookController extends Controller
                 break;
             case 'payment_intent.canceled':
                 $this->stripeService->handlePaymentCanceled($event);
+                break;
+            case 'payment_intent.created':
+                // PaymentIntent created - just log, no action needed
+                Log::info('Stripe PaymentIntent created: ' . ($event['data']['object']['id'] ?? 'unknown'));
                 break;
             default:
                 Log::info('Unhandled Stripe event type: ' . $event['type']);

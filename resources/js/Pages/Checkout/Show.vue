@@ -91,6 +91,7 @@ const paypalOrderId = ref(null)
 const approvalUrl = ref(null)
 const processing = ref(false)
 const stripeClientSecret = ref(null)
+const stripePaymentIntentId = ref(null)
 const stripeConfig = { publishable_key: props.stripe?.publishable_key || '' }
 
 const form = useForm({
@@ -111,6 +112,7 @@ watch(() => form.payment_method, async (newMethod, oldMethod) => {
         await createStripePaymentIntentForUI()
     } else {
         stripeClientSecret.value = null
+        stripePaymentIntentId.value = null
     }
 })
 const createStripePaymentIntentForUI = async () => {
@@ -120,9 +122,11 @@ const createStripePaymentIntentForUI = async () => {
             total_price: total
         })
         stripeClientSecret.value = response.data.client_secret
+        stripePaymentIntentId.value = response.data.id
     } catch (error) {
         console.error('Error creating Stripe payment intent:', error.response?.data?.error || error.message)
         stripeClientSecret.value = null
+        stripePaymentIntentId.value = null
     }
 }
 const handleStripePayment = async () => {
@@ -151,7 +155,7 @@ const createStripeOrderAndSave = async () => {
         const response = await window.axios.post('/checkout/stripe-order-save', {
             ...form.data(),
             payment_method: 'stripe',
-            payment_intent_id: stripeClientSecret.value // Save intent id if needed
+            payment_intent_id: stripePaymentIntentId.value // Use the actual Payment Intent ID
         })
         return response.data
     } catch (error) {
